@@ -4,15 +4,16 @@ ETL de RDV Service Public
 
 ## Usage
 
-Ouvrir un terminal à l’app Scalingo d’ETL : `scalingo --app rdv-service-public-etl --region osc-secnum-fr1 run bash`
+`bundle exec ruby main.rb --app rdvi --env demo --schema public`
 
-Lancer l’ETL
+## Dev local
 
-```sh
-./main.sh rdvsp prod
-```
+### Préparation
 
-## Dev local sur Mac OS
+- `cp .env.sample .env` et définir la variable DATABASE_URL
+- `createdb rdv-sp-etl`
+
+### Spécificités Mac OS
 
 il faut utiliser un bash plus récent que celui installé par défaut.
 

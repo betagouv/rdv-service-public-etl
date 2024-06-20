@@ -22,13 +22,6 @@ env=$2
 schema_name="${3:-$app}"
 database=${available_apps["${app}_${env}"]}
 
-read -p "Le process va maintenant importer <${app}> avec l'env <${env}> dans le schema <${schema_name}>, voulez-vous continuer ? (O/n): " answer
-
-if [[ ! "$answer" =~ ^[Oo]$ ]]; then
-  echo "Process annulé."
-  exit 0
-fi
-
 archive_name="backup.tar.gz"
 
 if ! command -v scalingo &> /dev/null; then
@@ -132,7 +125,7 @@ echo ""
 echo "Anonymisation de la base"
 echo "time bundle exec ./anonymize_database.rb "${app}" "${schema_name}""
 echo ""
-time bundle exec ./anonymize_database.rb "${app}" "${schema_name}"
+time bundle exec ruby anonymize_database.rb "${app}" "${schema_name}"
 
 echo ""
 echo "Re-création du role Postgres rdv_service_public_metabase"

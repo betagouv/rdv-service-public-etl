@@ -11,3 +11,5 @@ gem "zeitwerk", "~> 2.6"
 gem "activesupport", "~> 7.1"
 
 gem "pg", "~> 1.5"
+
+gem "dotenv", "~> 3.1"
