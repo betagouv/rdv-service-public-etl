@@ -1,5 +1,6 @@
 *.tar.gz
 *.pgsql
+*.tar
 *.sql
 .env
 mkmf.log

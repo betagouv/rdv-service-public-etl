@@ -1,14 +1,20 @@
+class User < ActiveRecord::Base; end
+class Agent < ActiveRecord::Base; end
+class Prescripteur < ActiveRecord::Base; end
+class Receipt < ActiveRecord::Base; end
+
 module Anonymizer
   class Runner
     def initialize(service, schema)
       @service = service
+      raise "invalid app" if %w[rdv_insertion rdv_service_public].exclude?(service)
       @schema = schema
     end
 
     def run
       Anonymizer::Core.anonymize_all_data!(service:, schema:)
 
-      if service == "rdvsp"
+      if service == "rdv_service_public"
         # Sanity checks
         if User.where.not(last_name: "[valeur anonymisée]").any?
           raise "Certains usagers n'ont pas été anonymisés !"
@@ -30,6 +36,6 @@ module Anonymizer
 
     private
 
-    attr_reader :service, :schema
+    attr_accessor :service, :schema
   end
 end
