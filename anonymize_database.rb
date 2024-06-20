@@ -1,3 +1,16 @@
+require "active_support/all"
+require "zeitwerk"
+require "active_record"
+
+loader = Zeitwerk::Loader.new
+loader.push_dir(".")
+loader.setup
+
+ActiveRecord::Base.establish_connection(
+  adapter: "postgresql",
+  encoding: "unicode"
+)
+
 Anonymizer::Core.anonymize_all_data!(service: ARGV[0], schema: ARGV[1] || ARGV[0])
 
 if ARGV[0] == "rdvsp"
