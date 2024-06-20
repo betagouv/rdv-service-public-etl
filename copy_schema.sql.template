@@ -1,0 +1,53 @@
+CREATE SCHEMA IF NOT EXISTS ·new_schema_name·;
+
+DO
+$$
+DECLARE
+    rec RECORD;
+    table_name TEXT;
+    index_name TEXT;
+    constraint_name TEXT;
+BEGIN
+    -- Copy tables and their data
+    FOR rec IN
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    LOOP
+        table_name := rec.tablename;
+        EXECUTE format('CREATE TABLE ·new_schema_name·.%I AS TABLE public.%I WITH NO DATA;', table_name, table_name);
+        EXECUTE format('INSERT INTO ·new_schema_name·.%I SELECT * FROM public.%I;', table_name, table_name);
+    END LOOP;
+
+    -- Copy indexes
+    FOR rec IN
+        SELECT indexname, indexdef
+        FROM pg_indexes
+        WHERE schemaname = 'public'
+    LOOP
+        index_name := rec.indexname;
+        EXECUTE replace(rec.indexdef, 'public.', '·new_schema_name·.');
+    END LOOP;
+
+    -- Copy constraints
+    -- FOR rec IN
+    --     SELECT conname, conrelid::regclass AS conrelid, pg_get_constraintdef(oid) AS condef
+    --     FROM pg_constraint
+    --     WHERE connamespace = 'public'::regnamespace
+    -- LOOP
+    --     constraint_name := rec.conname;
+    --     EXECUTE format('ALTER TABLE ·new_schema_name·.%I ADD CONSTRAINT %I %s;', rec.conrelid, constraint_name, rec.condef);
+    -- END LOOP;
+
+    -- Copy sequences and set their values
+    FOR rec IN
+        SELECT sequence_name
+        FROM information_schema.sequences
+        WHERE sequence_schema = 'public'
+    LOOP
+        EXECUTE format('CREATE SEQUENCE ·new_schema_name·.%I START WITH 1;', rec.sequence_name);
+        EXECUTE format('SELECT setval(''·new_schema_name·.%I'', nextval(''public.%I''), false);', rec.sequence_name, rec.sequence_name);
+    END LOOP;
+END;
+$$
+LANGUAGE plpgsql;

@@ -5,14 +5,13 @@ class Receipt < ActiveRecord::Base; end
 
 module Anonymizer
   class Runner
-    def initialize(service, schema)
+    def initialize(service)
       @service = service
       raise "invalid app" if %w[rdv_insertion rdv_service_public].exclude?(service)
-      @schema = schema
     end
 
     def run
-      Anonymizer::Core.anonymize_all_data!(service:, schema:)
+      Anonymizer::Core.anonymize_all_data!(service:, schema: "public")
 
       if service == "rdv_service_public"
         # Sanity checks
