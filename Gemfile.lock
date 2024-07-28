@@ -1,3 +1,8 @@
+PATH
+  remote: ../rdv-service-public/lib/anonymizer
+  specs:
+    anonymizer (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -31,7 +36,6 @@ GEM
     timeout (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    zeitwerk (2.6.16)
 
 PLATFORMS
   arm64-darwin-22
@@ -40,9 +44,9 @@ PLATFORMS
 DEPENDENCIES
   activerecord (~> 7.1)
   activesupport (~> 7.1)
+  anonymizer!
   dotenv (~> 3.1)
   pg (~> 1.5)
-  zeitwerk (~> 2.6)
 
 BUNDLED WITH
    2.5.4

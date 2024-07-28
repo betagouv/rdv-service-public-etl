@@ -4,3 +4,5 @@
 *.sql
 .env
 mkmf.log
+.bundle
+config.yml
