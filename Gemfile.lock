@@ -1,5 +1,8 @@
-PATH
-  remote: ../rdv-service-public/lib/anonymizer
+GIT
+  remote: https://github.com/betagouv/rdv-service-public.git
+  revision: f515dffed1174a6d7334c8abc4b8925cd1741720
+  branch: refactor/anonymizer-gem
+  glob: lib/anonymizer/anonymizer.gemspec
   specs:
     anonymizer (0.1.0)
 
