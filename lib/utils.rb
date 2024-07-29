@@ -1,18 +1,15 @@
 require "active_record"
 require 'logger'
+require 'uri'
 
 module Utils
-  def self.extract_passwords_to_pgpass(path, urls)
-    File.open path, "w" do |f|
-      f.write(
-        urls
-          .map { URI.parse(_1) }
-          .map { [_1.hostname, _1.port, _1.path[1..-1], _1.user, _1.password].join(":") }
-          .join("\n")
-      )
-      f.chmod(0600)
+  class SafeFormatter < Logger::Formatter
+    PG_URL_REGEX = %r{(postgresql://[^:]+):[^@]+(@[^:/]+:\d+/[^ ]+)}
+
+    def call(severity, time, progname, msg)
+      msg = msg.gsub(PG_URL_REGEX) { "#{$1}:XXXXXX#{$2}" } if msg.is_a?(String)
+      super(severity, time, progname, msg)
     end
-    urls.map { URI.parse(_1) }.map { |url| url.dup.tap { _1.password = nil }.to_s }
   end
 
   def run_command(command)
@@ -60,7 +57,7 @@ module Utils
   end
 
   def logger
-    @logger ||= Logger.new(STDOUT)
+    @logger ||= Logger.new(STDOUT, formatter: SafeFormatter.new)
   end
 
   def log_around(action)
