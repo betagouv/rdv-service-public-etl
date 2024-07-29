@@ -1,8 +1,9 @@
 *.tar.gz
 *.pgsql
 *.tar
-*.sql
+/*.sql
 .env
 mkmf.log
 .bundle
 config.yml
+.pgpass

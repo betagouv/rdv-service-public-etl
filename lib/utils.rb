@@ -2,6 +2,19 @@ require "active_record"
 require 'logger'
 
 module Utils
+  def self.extract_passwords_to_pgpass(path, urls)
+    File.open path, "w" do |f|
+      f.write(
+        urls
+          .map { URI.parse(_1) }
+          .map { [_1.hostname, _1.port, _1.path[1..-1], _1.user, _1.password].join(":") }
+          .join("\n")
+      )
+      f.chmod(0600)
+    end
+    urls.map { URI.parse(_1) }.map { |url| url.dup.tap { _1.password = nil }.to_s }
+  end
+
   def run_command(command)
     log_around command do
       res = system(command)

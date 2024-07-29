@@ -10,12 +10,13 @@ class Etl
 
   VALID_APPS = %w[rdv_insertion rdv_solidarites rdv_mairie].freeze
 
-  attr_reader :app, :etl_db_url, :rdv_db_url, :use_cache, :skip_restore, :config_url, :config
+  attr_reader :app, :etl_db_url, :rdv_db_url, :pgpass_path, :use_cache, :skip_restore, :config_url, :config
 
-  def initialize(app:, etl_db_url:, rdv_db_url:, config_url:, use_cache: false, skip_restore: false)
+  def initialize(app:, etl_db_url:, rdv_db_url:, pgpass_path:, config_url:, use_cache: false, skip_restore: false)
     @app = app
     @etl_db_url = etl_db_url
     @rdv_db_url = rdv_db_url
+    @pgpass_path = pgpass_path
     @config_url = config_url
     @use_cache = use_cache
     @skip_restore = skip_restore
@@ -30,6 +31,7 @@ class Etl
     if !File.exist?(dump_filename) || !use_cache
       run_command(
         <<~SH.strip_heredoc
+          PGPASSFILE=#{pgpass_path} \
           time pg_dump --clean --no-privileges --format tar \
             #{excluded_tables.map { "--exclude-table #{_1}"}.join(" ")} \
             -f #{dump_filename} \
@@ -39,7 +41,7 @@ class Etl
     end
     unless skip_restore
       run_sql_script("clean_public_schema.sql")
-      run_command(%Q(time pg_restore --clean --if-exists --no-owner --section=pre-data --section=data -d #{etl_db_url} #{dump_filename})) # restore without indexes
+      run_command(%Q(PGPASSFILE=#{pgpass_path} time pg_restore --clean --if-exists --no-owner --section=pre-data --section=data -d #{etl_db_url} #{dump_filename})) # restore without indexes
     end
     log_around("Anonymizing database") do
       Anonymizer.anonymize_all_data!(config:)
