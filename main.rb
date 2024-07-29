@@ -6,12 +6,9 @@ require_relative "lib/etl"
 
 Dotenv.load
 
-app, use_cache, skip_restore = nil, false, false
-
+app = nil
 OptionParser.new do |opts|
   opts.on('-a', '--app APP', Etl::VALID_APPS) { app = _1 }
-  opts.on('--use-cache') { use_cache = true }
-  opts.on('--skip-restore') { skip_restore = true }
 end.parse!
 
 config_url = {
@@ -23,4 +20,4 @@ config_url = {
 etl_db_url = ENV["ETL_DB_URL"]
 rdv_db_url = ENV["#{app.upcase}_DB_URL"]
 
-Etl.new(app:, etl_db_url:, rdv_db_url:, config_url:, use_cache:, skip_restore:).run
+Etl.new(app:, etl_db_url:, rdv_db_url:, config_url:).run

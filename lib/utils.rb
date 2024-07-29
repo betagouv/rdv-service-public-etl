@@ -34,6 +34,10 @@ module Utils
       host: parsed.hostname,
       port: parsed.port,
     )
+    ActiveRecord::Base.connection # triggers connection
+  rescue ActiveRecord::DatabaseConnectionError => e
+    logger.error "could not connect to ETL database #{db_url} : #{e.message}"
+    exit 1
   end
 
   def run_sql_command(command)
