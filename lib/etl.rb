@@ -38,7 +38,7 @@ class Etl
       run_command(
         <<~SH.strip_heredoc
           time pg_dump --clean --no-privileges --format tar \
-            #{excluded_tables.map { "--exclude-table #{_1}" }.join(' ')} \
+            #{@config.truncated_table_names.map { "--exclude-table #{_1}" }.join(' ')} \
             -f #{dump_filename} \
             #{rdv_db_url}
         SH
@@ -77,17 +77,5 @@ class Etl
 
   def dump_filename
     @dump_filename ||= "dump.#{app}.#{Time.now.strftime('%Y-%m-%d')}.pgsql.tar"
-  end
-
-  def excluded_tables
-    # TODO: this should live next to the RDVI and RDVSP codebases
-    @excluded_tables ||= %w[
-      versions
-      good_jobs
-      good_job_executions
-      good_job_settings
-      good_job_batches
-      good_job_processes
-    ].freeze
   end
 end
