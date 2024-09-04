@@ -57,7 +57,7 @@ module Utils
     logger.debug "Install additional tools to interact with the database:"
     logger.debug "dbclient-fetcher pgsql"
     logger.debug ""
-    system "dbclient-fetcher pgsql"
+    system "dbclient-fetcher pgsql 15"
   end
 
   def logger
