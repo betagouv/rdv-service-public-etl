@@ -8,7 +8,7 @@ require_relative 'utils'
 class Etl
   include Utils
 
-  VALID_APPS = %w[rdv_insertion rdv_solidarites rdv_mairie].freeze
+  VALID_APPS = %w[rdv_insertion rdv_solidarites rdv_service_public].freeze
 
   attr_reader :app, :etl_db_url, :rdv_db_url, :config_url, :config
 

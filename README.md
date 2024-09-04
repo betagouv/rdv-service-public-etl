@@ -23,7 +23,7 @@ sequenceDiagram
 > [!WARNING]
 > Assurez vous de supprimer les fichiers de dumps, les bases de données restaurées, et les mots de passe des users Postgres utilisés en local après vos tests
 
-### Variables d’environnement 
+### Variables d’environnement
 
 Copiez les variables d’environnement dans un fichier `.env` :
 
