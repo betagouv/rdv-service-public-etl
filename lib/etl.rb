@@ -10,13 +10,14 @@ class Etl
 
   VALID_APPS = %w[rdv_insertion rdv_solidarites rdv_service_public].freeze
 
-  attr_reader :app, :etl_db_url, :rdv_db_url, :config_url, :config
+  attr_reader :app, :etl_db_url, :rdv_db_url, :config_url, :metabase_username, :config
 
-  def initialize(app:, etl_db_url:, rdv_db_url:, config_url:)
+  def initialize(app:, etl_db_url:, rdv_db_url:, config_url:, metabase_username:)
     @app = app
     @etl_db_url = etl_db_url
     @rdv_db_url = rdv_db_url
     @config_url = config_url
+    @metabase_username = metabase_username
     raise 'invalid app' if VALID_APPS.exclude?(app)
   end
 
@@ -69,9 +70,12 @@ class Etl
     run_sql_command %(ALTER TABLE users DROP COLUMN IF EXISTS text_search_terms CASCADE)
 
     # STEP : move from public to target schema
-    run_sql_command %(DROP SCHEMA IF EXISTS #{app} CASCADE;)
+    target_schema = app
+    run_sql_command %(DROP SCHEMA IF EXISTS #{target_schema} CASCADE;)
     run_sql_script 'clone_schema.sql' # loads the clone_schema function without calling it
-    run_sql_command %(SELECT clone_schema('public', '#{app}', TRUE);)
+    run_sql_command %(SELECT clone_schema('public', '#{target_schema}', TRUE);)
+    run_sql_command %(GRANT USAGE ON SCHEMA #{target_schema} TO #{metabase_username};)
+    run_sql_command %(GRANT SELECT ON ALL TABLES IN SCHEMA #{target_schema} TO #{metabase_username};)
     run_sql_script 'clean_public_schema.sql'
   end
 

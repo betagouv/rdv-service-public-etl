@@ -29,13 +29,14 @@ Copiez les variables d’environnement dans un fichier `.env` :
 
 `cp .env.example .env`
 
-### Préparation postgres local
+### Préparation Postgres local
 
-Créer une base de données PostgreSQL et un rôle superuser pour l’ETL.
+Créer une base de données PostgreSQL, un rôle superuser pour l’ETL, et un rôle sans droits pour Metabase.
 
 ```sh
 createdb rdv-sp-etl
 echo "CREATE ROLE rdv_sp_etl_user WITH LOGIN SUPERUSER PASSWORD 'rdv_sp_etl_password'" | psql -d rdv-sp-etl;
+echo "CREATE ROLE  rdv_service_public_metabase WITH LOGIN PASSWORD 'rdv_metabase_password'" | psql -d rdv-sp-etl;
 ```
 
 Mettez à jour dans le `.env` :
