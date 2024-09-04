@@ -16,7 +16,6 @@ BEGIN
         SELECT 'DROP TABLE IF EXISTS "' || tablename || '" CASCADE;' 
         FROM pg_tables 
         WHERE schemaname = 'public'
-        AND tableowner = 'rdv_sp_etl'
     LOOP 
         EXECUTE stmt; 
     END LOOP;
@@ -41,17 +40,15 @@ BEGIN
           AND typname NOT LIKE 'pg_%'    -- Exclude system schemas
           AND typtype != 'b'    -- Exclude base types
           AND n.nspname <> 'information_schema'    -- Exclude information_schema\
-          AND pg_get_userbyid(t.typowner) = 'rdv_sp_etl'
     LOOP
         EXECUTE stmt;
     END LOOP;
 
-    -- Drop extensions owned by rdv_sp_etl
+    -- Drop extensions 
     FOR stmt IN
     SELECT 'DROP EXTENSION IF EXISTS "' || extname || '" CASCADE;'
     FROM pg_extension
     WHERE extname IN ('uuid-ossp', 'pg_stat_statements')
-      AND pg_get_userbyid(extowner) = 'rdv_sp_etl'
         LOOP
             EXECUTE stmt;
     END LOOP;
