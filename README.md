@@ -14,6 +14,7 @@ sequenceDiagram
     ETL->>DB_ETL: anonymize
     ETL->>DB_ETL: restore indexes
     ETL->>DB_ETL: move to schema rdv_solidarites, rdv_insertion...
+    ETL->>DB_ETL: grand permissions to metabase user
     ETL->>DB_ETL: clean public schema
     deactivate ETL
 ```

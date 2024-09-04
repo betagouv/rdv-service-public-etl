@@ -29,7 +29,12 @@ config_url_env_var, rdv_db_url_env_var = {
 etl_db_url_env_var = "ETL_DB_URL"
 metabase_username_env_var = "METABASE_USERNAME"
 
-[config_url_env_var, rdv_db_url_env_var, etl_db_url_env_var, metabase_username_env_var].each do |env_var|
+[
+  config_url_env_var,
+  rdv_db_url_env_var,
+  etl_db_url_env_var,
+  metabase_username_env_var
+].each do |env_var|
   raise "Missing environment variable #{env_var}" if ENV[env_var].blank?
 end
 

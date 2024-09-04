@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/betagouv/rdv-service-public.git
-  revision: 9db4f26b9036fedd24ab89141a5dd6766d0ea6d0
+  revision: e8d34e6008a1ada69a6b17b23a9224d2dc39f060
   branch: refactor/anonymizer-gem
   glob: lib/anonymizer/anonymizer.gemspec
   specs:
@@ -46,7 +46,6 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 7.1)
-  activesupport (~> 7.1)
   anonymizer!
   dotenv (~> 3.1)
   pg (~> 1.5)

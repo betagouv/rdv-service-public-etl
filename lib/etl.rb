@@ -1,8 +1,7 @@
-require 'mkmf'
-require 'active_support/all'
 require 'anonymizer'
 require 'yaml'
-require 'fileutils'
+require "fileutils"
+
 require_relative 'utils'
 
 class Etl
@@ -10,20 +9,27 @@ class Etl
 
   VALID_APPS = %w[rdv_insertion rdv_solidarites rdv_service_public].freeze
 
-  attr_reader :app, :etl_db_url, :rdv_db_url, :config_url, :metabase_username, :config
+  attr_reader :app, :etl_db_url, :rdv_db_url, :config_url, :metabase_username
 
   def initialize(app:, etl_db_url:, rdv_db_url:, config_url:, metabase_username:)
     @app = app
+    raise 'invalid app' if VALID_APPS.exclude?(app)
+
     @etl_db_url = etl_db_url
     @rdv_db_url = rdv_db_url
     @config_url = config_url
     @metabase_username = metabase_username
-    raise 'invalid app' if VALID_APPS.exclude?(app)
   end
 
   def run
-    install_dbclient_fetcher # only useful on Scalingo apps
-    connect_active_record etl_db_url
+    if !find_executable("pg_dump") && find_executable('dbclient-fetcher')
+      system "dbclient-fetcher pgsql 15" # only useful on Scalingo apps
+    end
+
+    log_around "connect to ETL database #{etl_db_url}" do
+      ActiveRecord::Base.establish_connection etl_db_url
+      ActiveRecord::Base.connection # triggers connection
+    end
 
     # STEP : download and load anonymizer config
     if ENV["CONFIG_PATH"] && File.exist?(ENV["CONFIG_PATH"])
@@ -34,7 +40,7 @@ class Etl
     end
     @config = Anonymizer::Config.new(YAML.safe_load(File.read(config_path)))
 
-    # STEP : dump from distant RDVSP or RDVI database 
+    # STEP : dump from distant RDVSP or RDVI database
     unless ENV['CACHE_DUMP'] && File.exist?(dump_filename)
       run_command(
         <<~SH.strip_heredoc
@@ -47,19 +53,23 @@ class Etl
     end
 
     # STEP : restore dump to ETL database, without indexes, in public schema
+    # cf https://www.postgresql.org/docs/current/app-pgrestore.html
+    # The data section contains actual table data as well as large-object definitions.
+    # Post-data items consist of definitions of indexes, triggers, rules and constraints other than validated check constraints.
+    # Pre-data items consist of all other data definition items.
     run_sql_script 'clean_public_schema.sql'
-    run_command %(time pg_restore --clean --if-exists --no-owner --section=pre-data --section=data -d #{etl_db_url} #{dump_filename}) # restore without indexes
+    run_command %(time pg_restore --clean --if-exists --no-owner --section=pre-data --section=data -d #{etl_db_url} #{dump_filename})
 
     # STEP : anonymize and truncate all tables
     log_around('Anonymizing database') do
       @config.table_configs.each do |table_config|
-        next unless ActiveRecord::Base.connection.table_exists?(table_config) 
-        Anonymizer::Table.new(table_config:).anonymize_records! 
+        next unless ActiveRecord::Base.connection.table_exists?(table_config)
+        Anonymizer::Table.new(table_config:).anonymize_records!
       end
     end
 
     # STEP : restore indexes
-    run_command %(time pg_restore --clean --if-exists --no-owner --section=post-data -d #{etl_db_url} #{dump_filename}) # now restore indexes
+    run_command %(time pg_restore --clean --if-exists --no-owner --section=post-data -d #{etl_db_url} #{dump_filename})
 
     # delete the dump file as soon as possible
     FileUtils.rm(dump_filename) unless ENV['CACHE_DUMP']
