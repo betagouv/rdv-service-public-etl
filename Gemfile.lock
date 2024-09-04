@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/betagouv/rdv-service-public.git
-  revision: e1e83a7361f086363f8f30f97dca7763f36b7e12
+  revision: 9db4f26b9036fedd24ab89141a5dd6766d0ea6d0
   branch: refactor/anonymizer-gem
   glob: lib/anonymizer/anonymizer.gemspec
   specs:
