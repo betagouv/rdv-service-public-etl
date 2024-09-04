@@ -150,24 +150,6 @@ WHERE connamespace = src_oid
 END LOOP;
 
 
--- Create views
-FOR object IN
-SELECT table_name::text,
-        view_definition
-FROM information_schema.views
-WHERE table_schema = quote_ident(source_schema)
-
-    LOOP
-    buffer := dest_schema || '.' || quote_ident(object);
-SELECT view_definition INTO v_def
-FROM information_schema.views
-WHERE table_schema = quote_ident(source_schema)
-  AND table_name = quote_ident(object);
-
-EXECUTE 'CREATE OR REPLACE VIEW ' || buffer || ' AS ' || v_def || ';' ;
-
-END LOOP;
-
 -- Create functions
 FOR func_oid IN
 SELECT oid
