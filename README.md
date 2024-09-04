@@ -19,6 +19,14 @@ sequenceDiagram
     deactivate ETL
 ```
 
+## Usage en staging et production
+
+```shell
+scalingo --region osc-secnum-fr1 --app rdv-service-public-etl-staging run "bundle exec ruby main.rb --app rdv_insertion"
+```
+
+Des CRON jobs réguliers seront bientôt configurés pour lancer ça.
+
 ## Usage en local
 
 > [!WARNING]
@@ -37,12 +45,12 @@ Créer une base de données PostgreSQL, un rôle superuser pour l’ETL, et un r
 ```sh
 createdb rdv-sp-etl
 echo "CREATE ROLE rdv_sp_etl_user WITH LOGIN SUPERUSER PASSWORD 'rdv_sp_etl_password'" | psql -d rdv-sp-etl;
-echo "CREATE ROLE  rdv_service_public_metabase WITH LOGIN PASSWORD 'rdv_metabase_password'" | psql -d rdv-sp-etl;
+echo "CREATE ROLE rdv_service_public_metabase WITH LOGIN PASSWORD 'rdv_metabase_password'" | psql -d rdv-sp-etl;
 ```
 
 Mettez à jour dans le `.env` :
 
-`RDV_ETL_DB_URL=postgresql://rdv_sp_etl_user:rdv_sp_etl_password@localhost:5432/rdv-sp-etl`
+`ETL_DB_URL=postgresql://rdv_sp_etl_user:rdv_sp_etl_password@localhost:5432/rdv-sp-etl`
 
 ### Préparation de l’URL de la base de données cible
 
@@ -56,7 +64,7 @@ scalingo env-get --app demo-rdv-solidarites --region osc-secnum-fr1  SCALINGO_PO
 
 Puisque nous allons utiliser le tunnel scalingo, le host et le port de la base de données sont toujours `localhost:10000`
 
-Récupérez les credentials d’un user postgres read-only en vous connectant depuis le dashboard scalingo.
+Récupérez les credentials d’un user Postgres read-only en vous connectant depuis le dashboard scalingo.
 
 Vous pouvez maintenant renseigner la variable d’environnement dans votre fichier `.env` :
 
@@ -64,14 +72,14 @@ Vous pouvez maintenant renseigner la variable d’environnement dans votre fichi
 
 ### Lancement
 
-Dans un terminal ouvrir un tunnel par exemple vers la db scalingo Postgres de demo-rdv-solidarites avec :
+Dans un terminal ouvrir un tunnel par exemple vers la db scalingo Postgres de `demo-rdv-solidarites` avec :
 
-`scalingo db-tunnel --app demo-rdv-solidarites --region osc-secnum-fr1  SCALINGO_POSTGRESQL_URL`
+```shell
+scalingo db-tunnel --app demo-rdv-solidarites --region osc-secnum-fr1  SCALINGO_POSTGRESQL_URL
+```
 
 Dans un autre terminal, lancer l’ETL :
 
-`bundle exec ruby main.rb --app rdv_solidarites`
-
-## Usage en production
-
-Pour la DB d’ETL, assurez-vous d’utiliser un rôle superuser PostgreSQL différent du rôle par défaut.
+```shell
+bundle exec ruby main.rb --app rdv_solidarites
+```
