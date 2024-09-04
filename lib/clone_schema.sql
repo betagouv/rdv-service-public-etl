@@ -150,18 +150,6 @@ WHERE connamespace = src_oid
 END LOOP;
 
 
--- Create functions
-FOR func_oid IN
-SELECT oid
-FROM pg_proc
-WHERE pronamespace = src_oid
-
-    LOOP
-SELECT pg_get_functiondef(func_oid) INTO qry;
-SELECT replace(qry, source_schema, dest_schema) INTO dest_qry;
-EXECUTE dest_qry;
-
-END LOOP;
 
   RETURN;
 
