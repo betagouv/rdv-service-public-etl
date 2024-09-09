@@ -26,12 +26,6 @@ class Etl
       system "dbclient-fetcher pgsql 15" # only useful on Scalingo apps
     end
 
-    # make sure ETL db connection works to avoid useless dumps
-    log_around "connect to ETL database #{etl_db_url}" do
-      ActiveRecord::Base.establish_connection etl_db_url
-      ActiveRecord::Base.connection # triggers connection
-    end
-
     # STEP : download and load anonymizer config
     if ENV["CONFIG_PATH"] && File.exist?(ENV["CONFIG_PATH"])
       config_path = ENV["CONFIG_PATH"]
@@ -40,6 +34,24 @@ class Etl
       config_path = "config.yml"
     end
     @config = Anonymizer::Config.new(YAML.safe_load(File.read(config_path)))
+
+    # make sure RDV db connection works
+    log_around "connect to RDV database #{rdv_db_url}" do
+      ActiveRecord::Base.establish_connection rdv_db_url
+      ActiveRecord::Base.connection # triggers connection
+    end
+
+    log_around "validate config exhaustivity" do
+      Anonymizer.validate_exhaustivity!(config: @config)
+    end
+
+    ActiveRecord::Base.connection_handler.clear_all_connections!
+
+    # make sure ETL db connection works to avoid useless dumps
+    log_around "connect to ETL database #{etl_db_url}" do
+      ActiveRecord::Base.establish_connection etl_db_url
+      ActiveRecord::Base.connection # triggers connection
+    end
 
     # STEP : dump from distant RDVSP or RDVI database
     unless ENV['CACHE_DUMP'] && File.exist?(dump_filename)
