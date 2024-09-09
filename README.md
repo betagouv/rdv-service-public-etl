@@ -2,6 +2,12 @@
 
 ETL de RDV Service Public
 
+Permet de maintenir à jour une base de données anonymisée utilisée pour les statistiques de RDV Service Public et RDV Insertion
+
+Beaucoup de contexte sur les origines de cet ETL sont disponibles dans la [PR#4362](https://github.com/betagouv/rdv-service-public/pull/4362) de RDV Service Public
+
+## Fonctionnement
+
 ```mermaid
 sequenceDiagram
     participant ETL as Script ETL
@@ -18,6 +24,16 @@ sequenceDiagram
     ETL->>DB_ETL: clean public schema
     deactivate ETL
 ```
+
+Le schéma public est utilisé transitoirement :
+
+- On restore les dumps tels quels dans le schéma public ;
+- On anonymise, puis on copie tout vers le schéma du nom souhaité ;
+- On supprime tout de public.
+
+On n’a pas trouvé de manière plus simple de faire ça car pg_restore ne permet pas de restorer dans un schéma différent.
+Il n’y a jamais de données non-anonymisées dans les schémas cibles.
+Le user Postgres de la base remplie par l’ETL utilisé par Metabase n’a pas accès à public mais uniquement aux schémas cibles.
 
 ## Usage en staging et production
 
