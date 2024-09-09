@@ -26,6 +26,7 @@ class Etl
       system "dbclient-fetcher pgsql 15" # only useful on Scalingo apps
     end
 
+    # make sure ETL db connection works to avoid useless dumps
     log_around "connect to ETL database #{etl_db_url}" do
       ActiveRecord::Base.establish_connection etl_db_url
       ActiveRecord::Base.connection # triggers connection
