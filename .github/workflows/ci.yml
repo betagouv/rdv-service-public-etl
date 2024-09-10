@@ -4,19 +4,10 @@ jobs:
   rubocop:
     name: Run Tests
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: rdv_sp_etl
-          POSTGRES_PASSWORD: swordfish
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports: ["5432:5432"]
     steps:
+      - uses: ankane/setup-postgres@v1
+        with:
+          postgres-version: 15
       - uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -24,6 +15,3 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
       - run: make test
-        env:
-          DB_USER: rdv_sp_etl
-          DB_PASSWORD: swordfish
