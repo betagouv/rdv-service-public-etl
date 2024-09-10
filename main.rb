@@ -3,6 +3,7 @@ require 'optparse'
 require 'dotenv'
 
 require_relative "lib/etl"
+require_relative "lib/utils"
 
 Dotenv.load
 
@@ -13,11 +14,17 @@ OptionParser.new do |opts|
   opts.on('-a', '--app APP', Etl::VALID_APPS) { app = _1 }
 end.parse!
 
-config_url = {
-  "rdv_insertion" => "https://raw.githubusercontent.com/adipasquale/rdv-insertion/feature/anonymizer-config/config/anonymizer.yml",
-  "rdv_solidarites" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/refactor/anonymizer-gem/config/anonymizer.yml",
-  "rdv_service_public" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/refactor/anonymizer-gem/config/anonymizer.yml"
-}[app]
+config_path = if ENV["CONFIG_PATH"] && File.exist?(ENV["CONFIG_PATH"])
+  ENV["CONFIG_PATH"]
+else
+  config_url = {
+    "rdv_insertion" => "https://raw.githubusercontent.com/adipasquale/rdv-insertion/feature/anonymizer-config/config/anonymizer.yml",
+    "rdv_solidarites" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/refactor/anonymizer-gem/config/anonymizer.yml",
+    "rdv_service_public" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/refactor/anonymizer-gem/config/anonymizer.yml"
+  }[app]
+  run_command "curl -o config.yml \"#{config_url}\""
+  "config.yml"
+end
 
 rdv_db_url_env_var = {
   "rdv_insertion" => "RDV_INSERTION_DB_URL",
@@ -40,4 +47,4 @@ rdv_db_url = ENV[rdv_db_url_env_var]
 etl_db_url = ENV[etl_db_url_env_var]
 metabase_username = ENV[metabase_username_env_var]
 
-Etl.new(app:, etl_db_url:, rdv_db_url:, config_url:, metabase_username:).run
+Etl.new(app:, etl_db_url:, rdv_db_url:, config_path:, metabase_username:).run

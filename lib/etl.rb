@@ -1,3 +1,4 @@
+require "active_support/all"
 require 'anonymizer'
 require 'yaml'
 require "fileutils"
@@ -9,15 +10,15 @@ class Etl
 
   VALID_APPS = %w[rdv_insertion rdv_solidarites rdv_service_public].freeze
 
-  attr_reader :app, :etl_db_url, :rdv_db_url, :config_url, :metabase_username
+  attr_reader :app, :etl_db_url, :rdv_db_url, :config_path, :metabase_username
 
-  def initialize(app:, etl_db_url:, rdv_db_url:, config_url:, metabase_username:)
+  def initialize(app:, etl_db_url:, rdv_db_url:, config_path:, metabase_username:)
     @app = app
     raise 'invalid app' if VALID_APPS.exclude?(app)
 
     @etl_db_url = etl_db_url
     @rdv_db_url = rdv_db_url
-    @config_url = config_url
+    @config_path = config_path
     @metabase_username = metabase_username
   end
 
@@ -26,13 +27,7 @@ class Etl
       system "dbclient-fetcher pgsql 15" # only useful on Scalingo apps
     end
 
-    # STEP : download and load anonymizer config
-    if ENV["CONFIG_PATH"] && File.exist?(ENV["CONFIG_PATH"])
-      config_path = ENV["CONFIG_PATH"]
-    else
-      run_command "curl -o config.yml \"#{config_url}\""
-      config_path = "config.yml"
-    end
+    # STEP : load anonymizer config
     @config = Anonymizer::Config.new(YAML.safe_load(File.read(config_path)))
 
     # make sure RDV db connection works
@@ -94,6 +89,8 @@ class Etl
     run_sql_command %(GRANT USAGE ON SCHEMA #{target_schema} TO #{metabase_username};)
     run_sql_command %(GRANT SELECT ON ALL TABLES IN SCHEMA #{target_schema} TO #{metabase_username};)
     run_sql_script 'clean_public_schema.sql'
+  ensure
+    ActiveRecord::Base.connection_handler.clear_all_connections!
   end
 
   def dump_filename
