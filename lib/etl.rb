@@ -76,7 +76,7 @@ class Etl
     # STEP : anonymize and truncate all tables
     log_around('Anonymizing database') do
       @config.table_configs.each do |table_config|
-        next unless ActiveRecord::Base.connection.table_exists?(table_config)
+        next unless ActiveRecord::Base.connection.table_exists?(table_config.table_name)
         Anonymizer::Table.new(table_config:).anonymize_records!
       end
     end
