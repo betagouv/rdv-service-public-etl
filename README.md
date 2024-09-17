@@ -19,7 +19,7 @@ sequenceDiagram
     ETL->>DB_ETL: restore to public schema without indexes
     ETL->>DB_ETL: anonymize
     ETL->>DB_ETL: restore indexes
-    ETL->>DB_ETL: move to schema rdv_solidarites, rdv_insertion...
+    ETL->>DB_ETL: move to schema rdvs, rdvi...
     ETL->>DB_ETL: grand permissions to metabase user
     ETL->>DB_ETL: clean public schema
     deactivate ETL
@@ -38,7 +38,7 @@ Le user Postgres de la base remplie par l’ETL utilisé par Metabase n’a pas 
 ## Usage en staging et production
 
 ```shell
-scalingo --region osc-secnum-fr1 --app rdv-service-public-etl-staging run "bundle exec ruby main.rb --app rdv_insertion"
+scalingo --region osc-secnum-fr1 --app rdv-service-public-etl-staging run "bundle exec ruby main.rb --app rdvi"
 ```
 
 Des CRON jobs réguliers seront bientôt configurés pour lancer ça.
@@ -61,7 +61,7 @@ Créer une base de données PostgreSQL, un rôle superuser pour l’ETL, et un r
 ```sh
 createdb rdv-sp-etl
 echo "CREATE ROLE rdv_sp_etl_user WITH LOGIN SUPERUSER PASSWORD 'rdv_sp_etl_password'" | psql -d rdv-sp-etl;
-echo "CREATE ROLE rdv_service_public_metabase WITH LOGIN PASSWORD 'rdv_metabase_password'" | psql -d rdv-sp-etl;
+echo "CREATE ROLE rdv_metabase WITH LOGIN PASSWORD 'rdv_metabase_password'" | psql -d rdv-sp-etl;
 ```
 
 Mettez à jour dans le `.env` :
@@ -97,5 +97,5 @@ scalingo db-tunnel --app demo-rdv-solidarites --region osc-secnum-fr1  SCALINGO_
 Dans un autre terminal, lancer l’ETL :
 
 ```shell
-bundle exec ruby main.rb --app rdv_solidarites
+bundle exec ruby main.rb --app rdvs
 ```

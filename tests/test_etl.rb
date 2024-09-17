@@ -17,7 +17,7 @@ class TestEtl < Minitest::Test
 
   def test_something
     Etl.new(
-      app: "rdv_solidarites",
+      app: "rdvs",
       etl_db_url: "postgresql://localhost/rdv_sp_etl_test_target",
       rdv_db_url: "postgresql://localhost/rdv_sp_etl_test_source",
       config_path: File.expand_path("config.yml", File.dirname(__FILE__)),
@@ -26,7 +26,7 @@ class TestEtl < Minitest::Test
 
     ActiveRecord::Base.establish_connection "postgresql://rdv_sp_etl_metabase_user:metabase_password@localhost/rdv_sp_etl_test_target"
     users_first_names = ActiveRecord::Base.connection.execute(
-      Arel::Table.new("rdv_solidarites.users").project(:first_name).to_sql
+      Arel::Table.new("rdvs.users").project(:first_name).to_sql
     ).values.map(&:first).uniq
     assert_equal users_first_names, ["[valeur anonymisée]"]
   end
