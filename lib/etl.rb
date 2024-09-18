@@ -23,9 +23,8 @@ class Etl
   end
 
   def run
-    if !find_executable("pg_dump") && find_executable('dbclient-fetcher')
-      system "dbclient-fetcher pgsql 15" # only useful on Scalingo apps
-    end
+    # only useful on Scalingo apps
+    run_command "dbclient-fetcher pgsql 15" if find_executable('dbclient-fetcher')
 
     # STEP : load anonymizer config
     @config = Anonymizer::Config.new(YAML.safe_load(File.read(config_path)))
@@ -52,7 +51,7 @@ class Etl
     unless ENV['CACHE_DUMP'] && File.exist?(dump_filename)
       run_command(
         <<~SH.strip_heredoc
-          time pg_dump --clean --no-privileges --format tar \
+          pg_dump --clean --no-privileges --format tar \
             #{@config.truncated_table_names.map { "--exclude-table #{_1}" }.join(' ')} \
             -f #{dump_filename} \
             #{rdv_db_url}
@@ -66,7 +65,7 @@ class Etl
     # Post-data items consist of definitions of indexes, triggers, rules and constraints other than validated check constraints.
     # Pre-data items consist of all other data definition items.
     run_sql_script 'clean_public_schema.sql'
-    run_command %(time pg_restore --clean --if-exists --no-owner --section=pre-data --section=data -d #{etl_db_url} #{dump_filename})
+    run_command %(pg_restore --clean --if-exists --no-owner --section=pre-data --section=data -d #{etl_db_url} #{dump_filename})
 
     # STEP : anonymize and truncate all tables
     log_around('Anonymizing database') do
@@ -77,7 +76,7 @@ class Etl
     end
 
     # STEP : restore indexes
-    run_command %(time pg_restore --clean --if-exists --no-owner --section=post-data -d #{etl_db_url} #{dump_filename})
+    run_command %(pg_restore --clean --if-exists --no-owner --section=post-data -d #{etl_db_url} #{dump_filename})
 
     # delete the dump file as soon as possible
     FileUtils.rm(dump_filename) unless ENV['CACHE_DUMP']
