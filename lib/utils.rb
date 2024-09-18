@@ -6,10 +6,10 @@ require 'mkmf' # for find_executable
 module Utils
   # ce log formatter évite de logger les mots de passes postgresql
   class SafeFormatter < Logger::Formatter
-    PG_URL_REGEX = %r{(postgresql://[^:]+):[^@]+(@[^:/]+:\d+/[^ ]+)}
+    AUTHENTICATED_URL_REGEX = %r{(\w+://[^:]+):[^@]+(@[^:/]+:\d+/[^ ]+)}
 
     def call(severity, time, progname, msg)
-      msg = msg.gsub(PG_URL_REGEX) { "#{$1}:XXXXXX#{$2}" } if msg.is_a?(String)
+      msg = msg.gsub(AUTHENTICATED_URL_REGEX) { "#{$1}:XXXXXX#{$2}" } if msg.is_a?(String)
       super(severity, time, progname, msg)
     end
   end
