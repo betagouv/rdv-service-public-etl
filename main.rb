@@ -18,7 +18,7 @@ config_path = if ENV["CONFIG_PATH"] && File.exist?(ENV["CONFIG_PATH"])
   ENV["CONFIG_PATH"]
 else
   config_url = {
-    "rdvi" => "https://raw.githubusercontent.com/adipasquale/rdv-insertion/feature/anonymizer-config/config/anonymizer.yml",
+    "rdvi" => "https://raw.githubusercontent.com/betagouv/rdv-insertion/staging/config/anonymizer.yml",
     "rdvs" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/production/config/anonymizer.yml",
     "rdvsp" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/production/config/anonymizer.yml"
   }[app]
