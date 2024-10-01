@@ -4,5 +4,9 @@
       "command": "30 4 * * 1-5 bundle exec ruby main.rb --app rdvsp",
       "_comment": "// Chargement des données de RDV Service Public à 4h30 du matin UTC du lundi au vendredi"
     },
+    {
+      "command": "0 5 * * 1-5 bundle exec ruby main.rb --app rdvs --async",
+      "_comment": "// Chargement des données de RDV Solidarités à 5h du matin UTC du lundi au vendredi"
+    },
   ]
 }
