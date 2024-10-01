@@ -95,6 +95,6 @@ class Etl
   end
 
   def dump_filename
-    @dump_filename ||= "dump.#{app}.#{Time.now.strftime('%Y-%m-%d')}.pgsql.tar"
+    @dump_filename ||= "/tmp/dump.#{app}.#{Time.now.strftime('%Y-%m-%d')}.pgsql.tar"
   end
 end

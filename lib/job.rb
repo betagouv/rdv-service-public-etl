@@ -14,8 +14,8 @@ class Job
     config_path = if ENV["CONFIG_PATH"] && File.exist?(ENV["CONFIG_PATH"])
                     ENV["CONFIG_PATH"]
                   else
-                    run_command "curl -o config.yml \"#{app_config.config_url}\""
-                    "config.yml"
+                    run_command "curl -o /tmp/config.yml \"#{app_config.config_url}\""
+                    "/tmp/config.yml"
                   end
 
     rdv_db_url_env_var = app_config.source_url_env_var
