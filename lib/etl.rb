@@ -8,14 +8,10 @@ require_relative 'utils'
 class Etl
   include Utils
 
-  VALID_APPS = %w[rdvi rdvs rdvsp].freeze
-
   attr_reader :app, :etl_db_url, :rdv_db_url, :config_path, :metabase_username
 
   def initialize(app:, etl_db_url:, rdv_db_url:, config_path:, metabase_username:)
     @app = app
-    raise 'invalid app' if VALID_APPS.exclude?(app)
-
     @etl_db_url = etl_db_url
     @rdv_db_url = rdv_db_url
     @config_path = config_path
@@ -99,6 +95,6 @@ class Etl
   end
 
   def dump_filename
-    @dump_filename ||= "dump.#{app}.#{Time.now.strftime('%Y-%m-%d')}.pgsql.tar"
+    @dump_filename ||= "/tmp/dump.#{app}.#{Time.now.strftime('%Y-%m-%d')}.pgsql.tar"
   end
 end
