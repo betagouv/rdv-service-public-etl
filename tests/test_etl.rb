@@ -26,9 +26,10 @@ class TestEtl < Minitest::Test
 
     ActiveRecord::Base.establish_connection "postgresql://rdv_sp_etl_metabase_user:metabase_password@localhost/rdv_sp_etl_test_target"
     users_rows = ActiveRecord::Base.connection.execute(
-      Arel::Table.new("rdvs.users").project(:id, :first_name).to_sql
+      Arel::Table.new("rdvs.users").project(:id, :first_name, :created_through).to_sql
     )
     assert_equal users_rows[0]["first_name"], "[valeur unique anonymisée #{users_rows[0]["id"]}]"
     assert_equal users_rows[1]["first_name"], "[valeur unique anonymisée #{users_rows[1]["id"]}]"
+    assert_equal users_rows[0]["created_through"], "user_sign_up" # colonne ENUM
   end
 end

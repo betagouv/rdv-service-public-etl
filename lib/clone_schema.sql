@@ -75,6 +75,18 @@ WHERE table_schema = quote_ident(source_schema)
 EXECUTE 'CREATE TABLE ' || buffer || ' (LIKE ' || quote_ident(source_schema) || '.' || quote_ident(object)
     || ' INCLUDING ALL)';
 
+-- Handle columns with enum types and cast them to text
+FOR column_, v_def IN
+SELECT column_name::text,
+       data_type::text
+FROM information_schema.columns
+WHERE table_schema = quote_ident(source_schema)
+  AND table_name = object
+  AND data_type = 'USER-DEFINED'  -- Enum columns are of type USER-DEFINED
+    LOOP
+      EXECUTE 'ALTER TABLE ' || buffer || ' ALTER COLUMN ' || column_ || ' SET DATA TYPE text USING ' || column_ || '::text;';
+END LOOP;
+
 IF include_recs
       THEN
       -- Insert records from source table
