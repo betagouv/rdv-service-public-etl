@@ -83,8 +83,9 @@ class Etl
 
     # workaround for a problematic column that we could also exclude
     # ERROR:  cannot insert a non-DEFAULT value into column "text_search_terms" (PG::GeneratedAlways)
-    # DÉTAIL : Column "text_search_terms" is a generated column.
+    # DÉTAIL : Column "text_search_terms" and "text_search_terms_with_notification_email" are generated columns.
     run_sql_command %(ALTER TABLE users DROP COLUMN IF EXISTS text_search_terms CASCADE)
+    run_sql_command %(ALTER TABLE users DROP COLUMN IF EXISTS text_search_terms_with_notification_email CASCADE)
 
     # STEP : move from public to target schema
     target_schema = app
