@@ -38,7 +38,7 @@ Le user Postgres de la base remplie par l’ETL utilisé par Metabase n’a pas 
 ## Usage en staging et production
 
 ```shell
-scalingo --region osc-secnum-fr1 --app rdv-service-public-etl-staging run "bundle exec ruby main.rb --app rdvi"
+scalingo --region osc-secnum-fr1 --app rdv-service-public-etl-staging run --detached "bundle exec ruby main.rb --app rdvi"
 ```
 
 Des CRON jobs réguliers seront bientôt configurés pour lancer ça.
