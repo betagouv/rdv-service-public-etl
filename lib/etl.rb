@@ -24,7 +24,7 @@ class Etl
 
   def run
     # only useful on Scalingo apps
-    run_command "dbclient-fetcher pgsql 15" if find_executable('dbclient-fetcher')
+    run_command "dbclient-fetcher pgsql 16" if find_executable('dbclient-fetcher')
 
     # STEP : load anonymizer config
     @config = Anonymizer::Config.new(YAML.safe_load(File.read(config_path)))
