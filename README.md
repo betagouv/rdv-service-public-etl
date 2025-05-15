@@ -37,11 +37,17 @@ Le user Postgres de la base remplie par l’ETL utilisé par Metabase n’a pas 
 
 ## Usage en staging et production
 
+### Hébergeur Scalingo
+
 ```shell
 scalingo --region osc-secnum-fr1 --app rdv-service-public-etl-staging run --detached "bundle exec ruby main.rb --app rdvi"
 ```
 
 Des CRON jobs réguliers seront bientôt configurés pour lancer ça.
+
+### Hébergeur Scaleway
+
+TODO
 
 ## Usage en local
 
@@ -50,7 +56,7 @@ Des CRON jobs réguliers seront bientôt configurés pour lancer ça.
 
 ### Variables d’environnement
 
-Copiez les variables d’environnement dans un fichier `.env` :
+Copiez le fichier `.env.example` puis renseignez les variables d’environnement dans un fichier `.env` :
 
 `cp .env.example .env`
 
@@ -98,4 +104,22 @@ Dans un autre terminal, lancer l’ETL :
 
 ```shell
 bundle exec ruby main.rb --app rdvs
+```
+
+## Usage en local avec Docker
+
+Commencer par renseigner les variables d'environnement nécessaires dans le fichier `.env`, par exemple :
+
+```dotenv
+ETL_DB_URL=postgresql://esd:[password]@192.168.120.44:5432/aei-etl
+METABASE_USERNAME=esd
+ORIGIN_DB_URL=postgresql://esd:[password]@192.168.120.44:5432/api-aei
+CONFIG_PATH=https://gitlab.com/incubateur-territoires/startups/agents-intervention/agents-en-intervention/-/raw/feat/metabase/config.etl.yml
+```
+
+Puis :
+
+```shell
+docker build -t etl .
+docker run --env-file .env -it etl bundle exec ruby main.rb --app [app]
 ```
