@@ -19,7 +19,7 @@ class TestEtl < Minitest::Test
     Etl.new(
       app: "rdvs",
       etl_db_url: "postgresql://localhost/rdv_sp_etl_test_target",
-      rdv_db_url: "postgresql://localhost/rdv_sp_etl_test_source",
+      origin_db_url: "postgresql://localhost/rdv_sp_etl_test_source",
       config_path: File.expand_path("config.yml", File.dirname(__FILE__)),
       metabase_username: "rdv_sp_etl_metabase_user"
     ).run
