@@ -34,29 +34,30 @@ end
 
 
 if config_url.key?(app)
-    config_path = config_url[app]
-    origin_db_url_env_var = rdv_db_url_list[app]
+  config_path = config_url[app]
+  origin_db_url_env_var = rdv_db_url_list[app]
 else
-    unless ENV["CONFIG_PATH"]
-      raise "La variable d'environnement CONFIG_PATH n'est pas définie"
-    end
+  unless ENV["CONFIG_PATH"]
+    raise "La variable d'environnement CONFIG_PATH n'est pas définie"
+  end
 
 
-    config_path = ENV["CONFIG_PATH"]
+  config_path = ENV["CONFIG_PATH"]
 
-    # Si le nom du fichier commence par https://, alors il s'agit d'une URL
-    if config_path.starts_with?("https://")
-      # Télécharger le fichier
-        run_command "curl -o config.yml \"#{config_path}\""
-        config_path = "config.yml"
-    end
-
-    unless File.exist?(config_path)
-      raise "La variable d'environnement CONFIG_PATH pointe vers un fichier inexistant"
-    end
-
-    origin_db_url_env_var = "ORIGIN_DB_URL"
+  origin_db_url_env_var = "ORIGIN_DB_URL"
 end
+
+# Si le nom du fichier commence par https://, alors il s'agit d'une URL
+if config_path.starts_with?("https://")
+  # Télécharger le fichier
+  run_command "curl -o config.yml \"#{config_path}\""
+  config_path = "config.yml"
+end
+
+unless File.exist?(config_path)
+  raise "La variable d'environnement CONFIG_PATH pointe vers un fichier inexistant"
+end
+
 
 etl_db_url_env_var = "ETL_DB_URL"
 metabase_username_env_var = "METABASE_USERNAME"
