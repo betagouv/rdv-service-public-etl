@@ -9,21 +9,10 @@ Dotenv.load
 
 include Utils
 
-app = ENV["APP"]
-OptionParser.new do |opts|
-  opts.on('-a', '--app APP', Etl::VALID_APPS) { app = _1 }
-end.parse!
-
-if app.nil?
-  raise "Définissez une variable d'environnement APP ou passez un argument --app"
-end
-
-
-
 config_url = {
-    "rdvi" => "https://raw.githubusercontent.com/betagouv/rdv-insertion/main/config/anonymizer.yml",
-    "rdvs" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/production/config/anonymizer.yml",
-    "rdvsp" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/production/config/anonymizer.yml"
+  "rdvi" => "https://raw.githubusercontent.com/betagouv/rdv-insertion/main/config/anonymizer.yml",
+  "rdvs" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/production/config/anonymizer.yml",
+  "rdvsp" => "https://raw.githubusercontent.com/betagouv/rdv-service-public/production/config/anonymizer.yml"
 }
 
 rdv_db_url_list = {
@@ -31,6 +20,18 @@ rdv_db_url_list = {
   "rdvs" => "RDV_SOLIDARITES_DB_URL",
   "rdvsp" => "RDV_SERVICE_PUBLIC_DB_URL"
 }
+
+
+app = ENV["APP"]
+OptionParser.new do |opts|
+  opts.on('-a', '--app APP', config_url.keys) { app = _1 }
+end.parse!
+
+if app.nil?
+  raise "Définissez une variable d'environnement APP ou passez un argument --app"
+end
+
+
 
 if config_url.key?(app)
     config_path = config_url[app]
