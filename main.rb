@@ -9,11 +9,16 @@ Dotenv.load
 
 include Utils
 
-unless ENV["APP"]
-  raise "La variable d'environnement CONFIG_PATH n'est pas définie"
+app = ENV["APP"]
+OptionParser.new do |opts|
+  opts.on('-a', '--app APP', Etl::VALID_APPS) { app = _1 }
+end.parse!
+
+if app.nil?
+  raise "Définissez une variable d'environnement APP ou passez un argument --app"
 end
 
-app = ENV["APP"]
+
 
 config_url = {
     "rdvi" => "https://raw.githubusercontent.com/betagouv/rdv-insertion/main/config/anonymizer.yml",
