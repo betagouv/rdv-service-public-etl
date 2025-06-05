@@ -8,16 +8,13 @@ require_relative 'utils'
 class Etl
   include Utils
 
-  VALID_APPS = %w[rdvi rdvs rdvsp].freeze
+  attr_reader :app, :etl_db_url, :origin_db_url, :config_path, :metabase_username
 
-  attr_reader :app, :etl_db_url, :rdv_db_url, :config_path, :metabase_username
-
-  def initialize(app:, etl_db_url:, rdv_db_url:, config_path:, metabase_username:)
+  def initialize(app:, etl_db_url:, origin_db_url:, config_path:, metabase_username:)
     @app = app
-    raise 'invalid app' if VALID_APPS.exclude?(app)
 
     @etl_db_url = etl_db_url
-    @rdv_db_url = rdv_db_url
+    @origin_db_url = origin_db_url
     @config_path = config_path
     @metabase_username = metabase_username
   end
@@ -30,8 +27,8 @@ class Etl
     @config = Anonymizer::Config.new(YAML.safe_load(File.read(config_path)))
 
     # make sure RDV db connection works
-    log_around "connect to RDV database #{rdv_db_url}" do
-      ActiveRecord::Base.establish_connection rdv_db_url
+    log_around "connect to origin database #{origin_db_url}" do
+      ActiveRecord::Base.establish_connection origin_db_url
       ActiveRecord::Base.connection # triggers connection
     end
 
@@ -54,7 +51,7 @@ class Etl
           pg_dump --clean --no-privileges --format tar \
             #{@config.truncated_table_names.map { "--exclude-table #{_1}" }.join(' ')} \
             -f #{dump_filename} \
-            #{rdv_db_url}
+            #{origin_db_url}
         SH
       )
     end
@@ -84,8 +81,13 @@ class Etl
     # workaround for a problematic column that we could also exclude
     # ERROR:  cannot insert a non-DEFAULT value into column "text_search_terms" (PG::GeneratedAlways)
     # DÉTAIL : Column "text_search_terms" and "text_search_terms_with_notification_email" are generated columns.
-    run_sql_command %(ALTER TABLE users DROP COLUMN IF EXISTS text_search_terms CASCADE)
-    run_sql_command %(ALTER TABLE users DROP COLUMN IF EXISTS text_search_terms_with_notification_email CASCADE)
+    # Vérifier que la table users existe avant de faire l'alter table
+    if ActiveRecord::Base.connection.table_exists?("users")
+      run_sql_command %(ALTER TABLE users DROP COLUMN IF EXISTS text_search_terms CASCADE)
+      run_sql_command %(ALTER TABLE users DROP COLUMN IF EXISTS text_search_terms_with_notification_email CASCADE)
+    else
+      logger.info "La table users n'existe pas, aucune modification n'est appliquée."
+    end
 
     # STEP : move from public to target schema
     target_schema = app
