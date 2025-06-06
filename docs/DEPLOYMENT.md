@@ -50,10 +50,10 @@ Si vous souhaitez publier manuellement l'image, vous pouvez utiliser les command
 echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
 
 # Construction de l'image
-docker build -t ghcr.io/betagouv/rdv-service-public-etl:latest .
+docker build -t ghcr.io/betagouv/multi-schema-postgres-etl:latest .
 
 # Publication de l'image
-docker push ghcr.io/betagouv/rdv-service-public-etl:latest
+docker push ghcr.io/betagouv/multi-schema-postgres-etl:latest
 ```
 
 ## Utilisation dans le projet de déploiement
@@ -67,7 +67,7 @@ resource "scaleway_job_definition" "etl_job" {
    memory_limit = 512  # 512 Mo
    cpu_limit = 140  # 140 mCPU (0.14 vCPU)
    timeout = "15m"  # 1 heure de timeout max
-   image_uri = "ghcr.io/betagouv/rdv-service-public-etl:latest"
+   image_uri = "ghcr.io/betagouv/multi-schema-postgres-etl:latest"
 
    cron {
       schedule = local.rdv_etl_cron_schedule # cron at 04:05 on day-of-month 1
@@ -97,7 +97,7 @@ variable "image_tag" {
 }
 
 resource "scaleway_job_definition" "etl_job" {
-  image_uri = "ghcr.io/betagouv/rdv-service-public-etl:${var.image_tag}"
+  image_uri = "ghcr.io/betagouv/multi-schema-postgres-etl:${var.image_tag}"
   # Autres configurations...
 }
 ```

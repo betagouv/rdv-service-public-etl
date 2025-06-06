@@ -1,8 +1,10 @@
-# rdv-service-public-etl
+# multi-schema-postgres-etl
 
-ETL de RDV Service Public
+Cet outil d'ETL permet de réunir et d'anonymiser plusieurs bases de données postgres dans une même base de données sous différents schemas.
 
-Permet de maintenir à jour une base de données anonymisée utilisée pour les statistiques de RDV Service Public et RDV Insertion
+Cette base de données peut ensuite être utilisée par Metabase ou un autre outil de BI.
+
+Cet outil est utilisé par RDV Service Public, RDV Insertion et Agents en Intervention
 
 Beaucoup de contexte sur les origines de cet ETL sont disponibles dans la [PR#4362](https://github.com/betagouv/rdv-service-public/pull/4362) de RDV Service Public
 
